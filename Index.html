@@ -390,6 +390,47 @@ topButtonsContainer.appendChild(rightButton);
     console.log("Botones superiores añadidos");
   };
 
+  // Agregar lógica para mostrar el botón 2 segundos antes del final de Escena 5
+video.addEventListener('timeupdate', () => {
+  if (video.src.includes("Escena 5.mp4")) {
+    const timeRemaining = video.duration - video.currentTime;
+
+    // Verificar si quedan 2 segundos y el botón aún no está creado
+    if (timeRemaining <= 2 && !document.querySelector('.circular-button')) {
+      showCircularButton(); // Mostrar el botón circular
+    }
+  }
+});
+
+// Función para mostrar el botón circular
+function showCircularButton() {
+  // Crear el botón circular
+  const circularButton = document.createElement('button');
+  circularButton.classList.add('circular-button'); // Clase para identificar el botón
+  circularButton.style.position = 'absolute';
+  circularButton.style.top = '30vh'; // A 30vh del borde superior
+  circularButton.style.left = '50%'; // Centrar horizontalmente
+  circularButton.style.transform = 'translateX(-50%)'; // Ajustar posición para centrar
+  circularButton.style.width = '12vw'; // Tamaño del botón (12% del ancho de la ventana)
+  circularButton.style.height = '12vw'; // Mantener proporción
+  circularButton.style.maxWidth = '60px'; // Tamaño máximo en pantallas grandes
+  circularButton.style.maxHeight = '60px'; // Tamaño máximo en pantallas grandes
+  circularButton.style.border = '3px solid red'; // Borde rojo
+  circularButton.style.borderRadius = '50%'; // Forma circular
+  circularButton.style.backgroundColor = 'transparent'; // Fondo transparente
+  circularButton.style.cursor = 'pointer';
+  circularButton.style.zIndex = '100'; // Asegurar que quede sobre otros elementos
+  circularButton.onclick = () => {
+    video.src = "Videos/Escena 5-1.mp4"; // Cambiar a la Escena 5-1
+    video.currentTime = 0; // Reiniciar desde el principio
+    video.play(); // Reproducir la nueva escena
+    circularButton.remove(); // Eliminar el botón después de usarlo
+  };
+
+  // Agregar el botón al cuerpo del documento
+  document.body.appendChild(circularButton);
+}
+
   // Asignar acciones a los botones para cambiar de escena
   document.getElementById('left-button').onclick = () => {
     // Cambiar a la escena 2-4 IZQ cuando se presiona el botón izquierdo
