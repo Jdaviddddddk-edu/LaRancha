@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Video Interactivo - Escena 01</title>
+  <title>La Rancha Interactiva</title>
   <style>
     body {
       margin: 0;
@@ -179,7 +179,7 @@
 
     <!-- Pantalla de inicio para habilitar audio -->
     <div class="start-audio" id="start-audio">
-      <button class="button" onclick="startVideo()">Reproducir con audio</button>
+      <button class="button" onclick="startVideo()">Iniciar</button>
     </div>
 
     <!-- Controles (mute) -->
@@ -211,6 +211,9 @@
     let scene2ToScene3Transition = false; // Control para la transición a Escena 2-2
     let scene2Started = false; // Para evitar repeticiones en Escena 2-1
     let scene2ButtonsAdded = false; // Control para evitar agregar botones múltiples veces
+    let scene5Started = false;
+    let scene7Started = false;
+    let scene7CountdownInterval; // Variable para almacenar el intervalo del temporizador
 
     backgroundMusic.volume = 0.2; // Música de fondo con volumen bajo
 
@@ -260,6 +263,53 @@
           scene2Started = true;
         };
       }
+
+      // Función para crear y mostrar el botón
+function createRedButton() {
+  // Crear un elemento de botón
+  let button = document.createElement("button");
+  
+  // Estilo del botón
+  button.style.position = "fixed"; // Fijarlo en la pantalla
+  button.style.top = "320px"; // Alinearlo a la parte superior
+  button.style.left = "50%"; // Centrarlo horizontalmente
+  button.style.transform = "translateX(-50%)"; // Ajustar para centrarlo
+  button.style.backgroundColor = "transparent"; // Color de fondo rojo
+  button.style.color = "white"; // Texto blanco
+  button.style.border = "none"; // Sin borde
+  button.style.padding = "40px 30px"; // Espaciado interno
+  button.style.cursor = "pointer"; // Cambiar el cursor al pasar el ratón
+
+  // Añadir el botón al body de la página
+  document.body.appendChild(button);
+  
+  // Acción del botón (ejemplo)
+  button.onclick = () => {
+  video.play(); // Reanudar el video
+  button.style.display = 'none'; // Opcional: Ocultar el botón después de presionarlo
+};
+}
+
+// Función para iniciar el contador
+function startScene5Countdown() {
+  if (scene5Started) {
+    let timer = 0; // Iniciar el contador desde 0
+    let countdownInterval = setInterval(() => {
+      timer++;
+      console.log("Contador: " + timer + " segundos");
+
+      // Si el contador llega a 10 segundos, pausamos el video
+      if (timer === 10) {
+        video.pause(); // Pausar el video
+        clearInterval(countdownInterval); // Detener el contador
+        console.log("Escena pausada en el segundo 10");
+
+        // Crear el botón rojo después de pausar el video
+        createRedButton();
+      }
+    }, 1000); // El intervalo es de 1 segundo (1000 ms)
+  }
+}
 
       video.addEventListener('timeupdate', () => {
         if (scene2ToScene3Transition && !scene2ButtonsAdded) {
@@ -352,7 +402,132 @@ centerButton.onclick = () => {
     video.onended = null; // Evita bucles infinitos
     video.src = "Videos/Escena 5.mp4"; // Reproduce la Escena 5
     video.currentTime = 0;
+    scene5Started = true;
+    startScene5Countdown();
     video.play();
+
+    // Cuando termine la Escena 5, reproducir Escena 6
+    video.onended = () => {
+      video.onended = null; // Evita bucles infinitos
+      video.src = "Videos/Escena 6.mp4"; // Reproduce la Escena 6
+      video.currentTime = 0;
+      video.play();
+
+      // Cuando termine la Escena 6, reproducir Escena 7-1
+      video.onended = () => {
+        video.onended = null; // Evita bucles infinitos
+        video.src = "Videos/Escena 7-1.mp4"; // Reproduce la Escena 7-1
+        video.currentTime = 0;
+        video.play();
+        scene7Started = true;
+
+        video.addEventListener('timeupdate', () => {
+  if (scene7Started && !scene7CountdownInterval) {
+    let timer = 0; // Inicializa el contador
+    scene7CountdownInterval = setInterval(() => {
+      timer++;
+      console.log("Contador Escena 7: " + timer + " segundos");
+
+      if (timer === 15) {
+        clearInterval(scene7CountdownInterval); // Detiene el temporizador
+        scene7CountdownInterval = null;
+        createBottomButtons(); // Crea los botones
+        video.pause();
+      }
+    }, 1000); // Incrementa cada segundo
+  }
+});
+
+function createBottomButtons() {
+  // Crear el contenedor para los botones
+  const bottomButtonsContainer = document.createElement('div');
+  bottomButtonsContainer.id = 'bottom-buttons';
+  bottomButtonsContainer.style.position = 'absolute';
+  bottomButtonsContainer.style.top = '300px'; // Separación desde el borde inferior
+  bottomButtonsContainer.style.width = '100%';
+  bottomButtonsContainer.style.display = 'flex';
+  bottomButtonsContainer.style.justifyContent = 'space-evenly'; // Espaciado uniforme
+  bottomButtonsContainer.style.alignItems = 'center'; // Alinear botones verticalmente
+  bottomButtonsContainer.style.padding = '0 10px'; // Espacio lateral
+  document.body.appendChild(bottomButtonsContainer);
+
+  // Variable para el contador de tiempo transcurrido
+  let elapsedTime = 0;
+  let isCounting = false;  // Controla si el contador está en marcha
+
+  // Duración total de los tres videos combinados (en segundos)
+  const totalVideoDuration = 11;
+
+  // Función para avanzar a la escena 8
+  const advanceToScene8 = () => {
+    console.log("Avanzando a la escena 8...");
+
+    // Cambiar a la escena 8-1
+    video.src = "Videos/Escena 8-1.mp4"; // Ruta de la escena 8
+    video.currentTime = 0;
+    video.play();
+
+    // Una vez que la escena 8-1 termine, avanzar a la escena 8-servir
+    video.addEventListener('ended', () => {
+      // Cambiar a la escena 8-servir
+      video.src = "Videos/Escena 8 servir.mp4"; // Ruta de la escena 8-servir
+      video.currentTime = 0;
+      video.play();
+    });
+  };
+
+  // Función para crear botones reutilizable
+  const createButton = (text, videoPath, videoDuration) => {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = 'button';
+    button.style.padding = '10px 20px'; // Tamaño del botón
+    button.style.fontSize = '16px'; // Tamaño del texto
+    button.onclick = () => {
+      console.log(`Botón ${text} presionado`);
+      // Acción para el botón
+      video.src = videoPath;
+      video.currentTime = 0;
+      video.play();
+
+      // Si no se ha iniciado el contador, iniciar ahora
+      if (!isCounting) {
+        isCounting = true;
+        elapsedTime = 0; // Reiniciar el contador
+      }
+
+      // Ocultar el botón y deshabilitarlo
+      button.style.visibility = 'hidden'; // Hacer invisible
+      button.disabled = true; // Deshabilitar el botón
+
+      // Continuar el contador y agregar la duración del video
+      const videoEndHandler = () => {
+        elapsedTime += videoDuration; // Sumar la duración del video actual al contador
+        video.removeEventListener('ended', videoEndHandler); // Desregistrar el evento después de usarlo
+
+        // Si el tiempo total es suficiente, ir a la escena 8
+        if (elapsedTime >= totalVideoDuration) {
+          advanceToScene8();
+          // Una vez que se haya avanzado a la escena 8, eliminar los botones
+          document.getElementById('bottom-buttons').remove();
+        }
+      };
+
+      // Añadir el evento "ended" para sumar el tiempo al contador cuando termine el video
+      video.addEventListener('ended', videoEndHandler);
+    };
+    return button;
+  };
+
+  // Crear y agregar los botones al contenedor con sus respectivas duraciones
+  bottomButtonsContainer.appendChild(createButton('Sal', 'Videos/Sal.mp4', 3));
+  bottomButtonsContainer.appendChild(createButton('Limón', 'Videos/Limon.mp4', 4));
+  bottomButtonsContainer.appendChild(createButton('Pimienta', 'Videos/Pimienta.mp4', 4));
+
+  console.log("Botones inferiores creados");
+}
+      };
+    };
   };
 };
 topButtonsContainer.appendChild(centerButton);
@@ -387,49 +562,9 @@ rightButton.onclick = () => {
 };
 topButtonsContainer.appendChild(rightButton);
 
-    console.log("Botones superiores añadidos");
+console.log("Botones superiores añadidos");
   };
 
-  // Agregar lógica para mostrar el botón 2 segundos antes del final de Escena 5
-video.addEventListener('timeupdate', () => {
-  if (video.src.includes("Escena 5.mp4")) {
-    const timeRemaining = video.duration - video.currentTime;
-
-    // Verificar si quedan 2 segundos y el botón aún no está creado
-    if (timeRemaining <= 2 && !document.querySelector('.circular-button')) {
-      showCircularButton(); // Mostrar el botón circular
-    }
-  }
-});
-
-// Función para mostrar el botón circular
-function showCircularButton() {
-  // Crear el botón circular
-  const circularButton = document.createElement('button');
-  circularButton.classList.add('circular-button'); // Clase para identificar el botón
-  circularButton.style.position = 'absolute';
-  circularButton.style.top = '30vh'; // A 30vh del borde superior
-  circularButton.style.left = '50%'; // Centrar horizontalmente
-  circularButton.style.transform = 'translateX(-50%)'; // Ajustar posición para centrar
-  circularButton.style.width = '12vw'; // Tamaño del botón (12% del ancho de la ventana)
-  circularButton.style.height = '12vw'; // Mantener proporción
-  circularButton.style.maxWidth = '60px'; // Tamaño máximo en pantallas grandes
-  circularButton.style.maxHeight = '60px'; // Tamaño máximo en pantallas grandes
-  circularButton.style.border = '3px solid red'; // Borde rojo
-  circularButton.style.borderRadius = '50%'; // Forma circular
-  circularButton.style.backgroundColor = 'transparent'; // Fondo transparente
-  circularButton.style.cursor = 'pointer';
-  circularButton.style.zIndex = '100'; // Asegurar que quede sobre otros elementos
-  circularButton.onclick = () => {
-    video.src = "Videos/Escena 5-1.mp4"; // Cambiar a la Escena 5-1
-    video.currentTime = 0; // Reiniciar desde el principio
-    video.play(); // Reproducir la nueva escena
-    circularButton.remove(); // Eliminar el botón después de usarlo
-  };
-
-  // Agregar el botón al cuerpo del documento
-  document.body.appendChild(circularButton);
-}
 
   // Asignar acciones a los botones para cambiar de escena
   document.getElementById('left-button').onclick = () => {
