@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Interactivo - Escena 01</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      overflow: hidden;
+    }
+    .container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+    }
+    video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      height: 100vh;
+      width: auto;
+    }
+    @media (max-aspect-ratio: 9/16) {
+      video {
+        width: 100vw;
+        height: auto;
+      }
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+    .dialogue {
+      position: absolute;
+      bottom: 20%;
+      width: 90%;
+      max-width: 400px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 1.2em;
+      text-align: center;
+      pointer-events: none;
+      display: none; /* Inicialmente oculta */
+    }
+    .interaction {
+      position: absolute;
+      bottom: 10%;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      visibility: hidden;
+    }
+    .button {
+      background: #ff6600;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .button:hover {
+      background: #cc5200;
+    }
+    .start-audio {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    .control-buttons {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      z-index: 20;
+    }
+    .control-buttons button {
+      margin-bottom: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .control-buttons button:hover {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+/* Contenedor para los botones circulares */
+#circle-buttons {
+  position: absolute;
+  bottom: 5vh; /* Espacio del 5% de la altura del video desde el borde inferior */
+  width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
+  display: flex;
+  justify-content: space-between; /* Espacio entre los botones */
+  padding: 0 5%; /* Márgenes a los lados */
+  box-sizing: border-box; /* Asegura que el padding no afecte el tamaño del contenedor */
+  z-index: 100;
+  pointer-events: none; /* Los botones no interceptan clics hasta que se habiliten */
+}
+
+/* Estilo para los botones circulares */
+.circle-button {
+  width: 12vw; /* El ancho del botón es el 12% de la ventana de visualización (ancho) */
+  height: 12vw; /* Mantener la proporción cuadrada */
+  max-width: 60px; /* Limitar el tamaño máximo del botón en pantallas grandes */
+  max-height: 60px; /* Limitar el tamaño máximo del botón en pantallas grandes */
+  border: 3px solid red;
+  background-color: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto; /* Los botones serán clicables */
+  transition: opacity 0.3s ease-in-out;
+}
+
+.circle-button:hover {
+  opacity: 0.8;
+}
+
+/* Asegura que los botones estén a distancias diferentes del borde */
+#left-button {
+  margin-left: 10vw; /* El botón izquierdo tiene 10% de distancia del borde izquierdo */
+}
+
+#right-button {
+  margin-right: 15vw; /* El botón derecho tiene 15% de distancia del borde derecho */
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Video principal -->
+    <video id="scene01" playsinline>
+      <source src="Videos/Escena 1-1.mp4" type="video/mp4">
+      Tu navegador no soporta videos HTML5.
+    </video>
+
+    <!-- Música de fondo -->
+    <audio id="background-music" loop>
+      <source src="Audios/Fondo 1.mp3" type="audio/mp3">
+      Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <!-- Superposición de elementos interactivos -->
+    <div class="overlay">
+      <div class="dialogue" id="dialogue-box"></div>
+      
+      <!-- Botón de interacción -->
+      <div class="interaction" id="interaction-buttons">
+        <button class="button" id="continue-button" onclick="continueVideo()">Continuar</button>
+      </div>
+    </div>
+
+    <!-- Pantalla de inicio para habilitar audio -->
+    <div class="start-audio" id="start-audio">
+      <button class="button" onclick="startVideo()">Reproducir con audio</button>
+    </div>
+
+    <!-- Controles (mute) -->
+    <div class="control-buttons">
+      <button id="mute-button" onclick="toggleMute()">Mute Música</button>
+    </div>
+  </div>
+
+  <div id="circle-buttons" style="display: none;">
+    <button id="left-button" class="circle-button"></button>
+    <button id="right-button" class="circle-button"></button>
+  </div>
+  
+
+  <script>
+    const video = document.getElementById('scene01');
+    const dialogueBox = document.getElementById('dialogue-box');
+    const interactionButtons = document.getElementById('interaction-buttons');
+    const startAudioDiv = document.getElementById('start-audio');
+    const backgroundMusic = document.getElementById('background-music');
+    let dialogueShown = false;
+    let buttonShown = false;
+    let videoChanged = false;
+    let secondDialogueShown = false;
+    let thirdDialogueShown = false;
+    let scene2DialogueStartTime = null; // Variable para iniciar el conteo de la escena 2-1
+    let buttonClickedOnce = false; // Asegura que el botón de la primera escena solo se muestre una vez
+    let scene2VideoPaused = false; // Control para pausar Escena 2-1
+    let scene2ToScene3Transition = false; // Control para la transición a Escena 2-2
+    let scene2Started = false; // Para evitar repeticiones en Escena 2-1
+    let scene2ButtonsAdded = false; // Control para evitar agregar botones múltiples veces
+
+    backgroundMusic.volume = 0.2; // Música de fondo con volumen bajo
+
+    function startVideo() {
+      video.play();
+      backgroundMusic.play(); // Reproducir música de fondo
+      startAudioDiv.style.display = 'none'; // Ocultar mensaje de inicio
+    }
+
+    video.addEventListener('timeupdate', () => {
+      console.log("Current time:", video.currentTime);
+
+      if (video.currentTime >= 4 && !dialogueShown) {
+        dialogueBox.textContent = "Mientras esperas tu comida, te queremos contar cómo es todo esto posible, y que el día de hoy puedas disfrutar de estos deliciosos platos.";
+        dialogueBox.style.display = 'block';
+        dialogueShown = true;
+        lowerBackgroundMusic();
+      }
+
+      if (video.currentTime >= 13 && !buttonShown && !buttonClickedOnce) {
+        video.pause();
+        interactionButtons.style.visibility = 'visible';
+        buttonShown = true;
+      }
+
+      if (video.currentTime >= 14.833 && !videoChanged) {
+        videoChanged = true;
+        video.src = "Videos/Escena 1-2.mp4";
+        video.currentTime = 0;
+        video.play();
+        console.log("Escena 1-2 cargada");
+      }
+
+      if (video.currentTime >= 1.3 && videoChanged && !secondDialogueShown) {
+        dialogueBox.textContent = "Yo soy COCO, me dicen BIGOTÓN y hoy te voy a guiar por este maravilloso proceso de los platos de La Rancha.";
+        dialogueBox.style.display = 'block';
+        secondDialogueShown = true;
+        lowerBackgroundMusic();
+      }
+
+      if (video.currentTime >= video.duration - 0.2 && videoChanged && !scene2Started) {
+        video.pause();
+        interactionButtons.style.visibility = 'visible';
+        document.getElementById('continue-button').onclick = () => {
+          interactionButtons.style.visibility = 'hidden';
+          video.play();
+          scene2Started = true;
+        };
+      }
+
+      video.addEventListener('timeupdate', () => {
+        if (scene2ToScene3Transition && !scene2ButtonsAdded) {
+  // Mostrar los botones circulares
+  const circleButtons = document.getElementById('circle-buttons');
+  circleButtons.style.display = 'flex';
+
+  // Crear el botón de continuar dinámicamente
+  const continueButton = document.createElement('button');
+  continueButton.textContent = "Continuar";
+  continueButton.className = 'button';
+  continueButton.style.position = 'absolute';
+  continueButton.style.bottom = '10%';
+  continueButton.style.left = '50%';
+  continueButton.style.transform = 'translateX(-50%)';
+  continueButton.style.display = 'none'; // Inicialmente oculto
+  document.body.appendChild(continueButton);
+
+  // Función para reproducir Escena 4-1
+  const playScene41 = () => {
+    const video = document.getElementById('scene01');
+    video.src = "Videos/Escena 4-1.mp4";
+    video.currentTime = 0;
+    video.play();
+    continueButton.style.display = 'none'; // Ocultar el botón continuar
+    
+
+    // Mostrar tres botones a los 17 segundos
+    setTimeout(() => {
+      createTopButtons();
+      continueButton.style.display = 'none';
+    }, 17000); // 17 segundos en milisegundos
+  };
+
+  // Función para crear los tres botones en la parte superior
+  const createTopButtons = () => {
+    const topButtonsContainer = document.createElement('div');
+    topButtonsContainer.id = 'top-buttons';
+    topButtonsContainer.style.position = 'absolute';
+    topButtonsContainer.style.top = '5%';
+    topButtonsContainer.style.width = '80%';
+    topButtonsContainer.style.display = 'flex';
+    topButtonsContainer.style.justifyContent = 'space-between';
+    topButtonsContainer.style.padding = '0 5%';
+    document.body.appendChild(topButtonsContainer);
+
+    // Botón izquierdo
+const leftButton = document.createElement('button');
+leftButton.textContent = "Izquierda";
+leftButton.className = 'button';
+leftButton.style.flex = '0 0 auto';
+leftButton.onclick = () => {
+  // Reproduce el video asignado a la izquierda (Escena 4-4)
+  video.src = "Videos/Escena 4-4.mp4";
+  video.currentTime = 0;
+  video.play();
+  topButtonsContainer.remove(); // Oculta los botones
+
+  // Al terminar Escena 4-4, reinicia Escena 4-1 desde el segundo 15
+  video.onended = () => {
+    video.onended = null; // Evita bucles infinitos
+    video.src = "Videos/Escena 4-1.mp4";
+    video.currentTime = 15; // Reinicia desde el segundo 15
+    video.play();
+
+    // Mostrar los botones superiores nuevamente a los 17 segundos
+    video.ontimeupdate = () => {
+      if (video.currentTime >= 17) {
+        video.ontimeupdate = null; // Evita múltiples ejecuciones
+        createTopButtons(video); // Muestra los botones de nuevo
+      }
+    };
+  };
+};
+topButtonsContainer.appendChild(leftButton);
+
+// Botón central (sin cambios, reproduce Escena 4-3 directamente)
+const centerButton = document.createElement('button');
+centerButton.textContent = "Centro";
+centerButton.className = 'button';
+centerButton.style.flex = '0 0 auto';
+centerButton.onclick = () => {
+  video.src = "Videos/Escena 4-3.mp4"; // Reproduce Escena 4-3
+  video.currentTime = 0;
+  video.play();
+  topButtonsContainer.remove(); // Oculta los botones
+
+  // Cuando termine la Escena 4-3, reproducir Escena 5
+  video.onended = () => {
+    video.onended = null; // Evita bucles infinitos
+    video.src = "Videos/Escena 5.mp4"; // Reproduce la Escena 5
+    video.currentTime = 0;
+    video.play();
+  };
+};
+topButtonsContainer.appendChild(centerButton);
+
+// Botón derecho
+const rightButton = document.createElement('button');
+rightButton.textContent = "Derecha";
+rightButton.className = 'button';
+rightButton.style.flex = '0 0 auto';
+rightButton.onclick = () => {
+  // Reproduce el video asignado a la derecha (Escena 4-5)
+  video.src = "Videos/Escena 4-5.mp4";
+  video.currentTime = 0;
+  video.play();
+  topButtonsContainer.remove(); // Oculta los botones
+
+  // Al terminar Escena 4-5, reinicia Escena 4-1 desde el segundo 15
+  video.onended = () => {
+    video.onended = null; // Evita bucles infinitos
+    video.src = "Videos/Escena 4-1.mp4";
+    video.currentTime = 15; // Reinicia desde el segundo 15
+    video.play();
+
+    // Mostrar los botones superiores nuevamente a los 17 segundos
+    video.ontimeupdate = () => {
+      if (video.currentTime >= 17) {
+        video.ontimeupdate = null; // Evita múltiples ejecuciones
+        createTopButtons(video); // Muestra los botones de nuevo
+      }
+    };
+  };
+};
+topButtonsContainer.appendChild(rightButton);
+
+    console.log("Botones superiores añadidos");
+  };
+
+  // Asignar acciones a los botones para cambiar de escena
+  document.getElementById('left-button').onclick = () => {
+    // Cambiar a la escena 2-4 IZQ cuando se presiona el botón izquierdo
+    const video = document.getElementById('scene01');
+    video.src = "Videos/Escena 2-4 IZQ.mp4"; // Cambiar a la escena izquierda
+    video.currentTime = 0; // Asegura que el video empiece desde el principio
+    video.play(); // Reproduce el video
+
+    // Ocultar los botones después de hacer clic
+    circleButtons.style.display = 'none';
+
+    // Mostrar el botón de continuar después de finalizar Escena 2-4 IZQ
+    video.onended = () => {
+      continueButton.style.display = 'block'; // Mostrar el botón continuar
+      continueButton.onclick = playScene41; // Asignar la acción de reproducir Escena 4-1
+    };
+  };
+
+  document.getElementById('right-button').onclick = () => {
+    // Cambiar a la escena 2-3 DER cuando se presiona el botón derecho
+    const video = document.getElementById('scene01');
+    video.src = "Videos/Escena 2-3 DER.mp4"; // Cambiar a la escena derecha
+    video.currentTime = 0; // Asegura que el video empiece desde el principio
+    video.play(); // Reproduce el video
+
+    // Ocultar los botones después de hacer clic
+    circleButtons.style.display = 'none';
+
+    // Mostrar el botón de continuar después de finalizar Escena 2-4 IZQ
+    video.onended = () => {
+      continueButton.style.display = 'block'; // Mostrar el botón continuar
+      continueButton.onclick = playScene41; // Asignar la acción de reproducir Escena 4-1
+    };
+  };
+
+  scene2ButtonsAdded = true; // Asegura que esto no se ejecute más de una vez
+  console.log("Botones circulares añadidos");
+}
+});
+
+      if (scene2Started && video.currentTime >= video.duration - 0.1 && !scene2VideoPaused) {
+        video.src = "Videos/Escena 2-1.mp4";
+        dialogueBox.style.display = 'none';
+        video.currentTime = 0;
+        video.play();
+        console.log("Escena 2-1 cargada");
+        scene2VideoPaused = true;
+      }
+
+      if (video.currentTime >= video.duration - 0.1 && scene2VideoPaused && !scene2ToScene3Transition) {
+        video.src = "Videos/Escena 2-2.mp4";
+        video.currentTime = 0;
+        video.play();
+        console.log("Escena 2-2 cargada");
+        scene2ToScene3Transition = true;
+      }
+    });
+
+    function continueVideo() {
+      interactionButtons.style.visibility = 'hidden';
+      dialogueBox.style.display = 'none';
+      video.play();
+      restoreBackgroundMusic();
+      buttonClickedOnce = true;
+    }
+
+    function toggleMute() {
+      if (backgroundMusic.muted) {
+        backgroundMusic.muted = false;
+        document.getElementById('mute-button').textContent = "Mute Música";
+      } else {
+        backgroundMusic.muted = true;
+        document.getElementById('mute-button').textContent = "Unmute Música";
+      }
+    }
+
+    function lowerBackgroundMusic() {
+      backgroundMusic.volume = 0.1;
+    }
+
+    function restoreBackgroundMusic() {
+      backgroundMusic.volume = 0.2;
+    }
+</script>
+</body>
+</html>
