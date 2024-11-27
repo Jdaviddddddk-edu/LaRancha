@@ -225,16 +225,17 @@ function loadAllVideos(videoPaths) {
     return new Promise((resolve, reject) => {
       const videoElement = document.createElement('video');
       videoElement.src = path;
-      videoElement.preload = 'auto';  // Pre-cargar los primeros datos del video
+      videoElement.preload = 'auto';  // Hacemos que se cargue en segundo plano
 
-      videoElement.onloadeddata = () => {
-        console.log(`${path} cargado`);
-        resolve(path);  // Resuelve la promesa cuando el video está cargado
+      // Nos aseguramos de que los videos estén completamente listos antes de resolver
+      videoElement.oncanplaythrough = () => {
+        console.log(`${path} completamente cargado y listo para reproducir`);
+        resolve(videoElement);  // Resolvemos la promesa cuando el video esté completamente listo
       };
 
       videoElement.onerror = (e) => {
         console.error(`Error al cargar el video: ${path}`, e);
-        reject(e);  // Rechaza la promesa si ocurre un error
+        reject(e);  // Si ocurre un error en la carga, rechazamos la promesa
       };
     });
   });
@@ -271,11 +272,14 @@ const videoPaths = [
 
 // Función que se ejecuta cuando todos los videos están cargados
 loadAllVideos(videoPaths)
-  .then(() => {
+  .then((loadedVideos) => {
     console.log('Todos los videos están cargados');
+    
     // Ocultar la pantalla de carga
     document.getElementById('loading-screen').style.display = 'none';
-    
+
+    // Ahora, los videos están listos para ser reproducidos
+    startPlayback(loadedVideos);  // Aquí pasamos los videos cargados para comenzar la reproducción
   })
   .catch((error) => {
     console.error('Error al cargar los videos:', error);
@@ -283,6 +287,7 @@ loadAllVideos(videoPaths)
 
 // Mostrar la pantalla de carga mientras los videos se están cargando
 document.getElementById('loading-screen').style.display = 'flex';
+
 
     const video = document.getElementById('scene01');
     const dialogueBox = document.getElementById('dialogue-box');
