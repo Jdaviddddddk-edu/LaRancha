@@ -221,14 +221,11 @@
 
     // Función para cargar todos los videos
 function loadAllVideos(videoPaths) {
-  // Muestra la pantalla de carga
-  const loadingScreen = document.getElementById('loading-screen');
-  loadingScreen.style.display = 'flex';
-
   const promises = videoPaths.map((path) => {
     return new Promise((resolve, reject) => {
       const videoElement = document.createElement('video');
       videoElement.src = path;
+      videoElement.preload = 'auto';  // Pre-cargar los primeros datos del video
 
       videoElement.onloadeddata = () => {
         console.log(`${path} cargado`);
@@ -242,15 +239,7 @@ function loadAllVideos(videoPaths) {
     });
   });
 
-  return Promise.all(promises)  // Devuelve una promesa que se resuelve cuando todos los videos están cargados
-    .then(() => {
-      // Oculta la pantalla de carga cuando todos los videos están cargados
-      loadingScreen.style.display = 'none';
-    })
-    .catch((error) => {
-      console.error("Error al cargar los videos:", error);
-      loadingScreen.innerHTML = "Error al cargar los videos. Intenta de nuevo."; // Mensaje de error
-    });
+  return Promise.all(promises);  // Devuelve una promesa que se resuelve cuando todos los videos están cargados
 }
 
 // Rutas de los videos que quieres cargar
@@ -280,9 +269,20 @@ const videoPaths = [
   "Videos/Sal.mp4"
 ];
 
-// Llamada para cargar todos los videos antes de iniciar
-loadAllVideos(videoPaths);
+// Función que se ejecuta cuando todos los videos están cargados
+loadAllVideos(videoPaths)
+  .then(() => {
+    console.log('Todos los videos están cargados');
+    // Ocultar la pantalla de carga
+    document.getElementById('loading-screen').style.display = 'none';
+    
+  })
+  .catch((error) => {
+    console.error('Error al cargar los videos:', error);
+  });
 
+// Mostrar la pantalla de carga mientras los videos se están cargando
+document.getElementById('loading-screen').style.display = 'flex';
 
     const video = document.getElementById('scene01');
     const dialogueBox = document.getElementById('dialogue-box');
