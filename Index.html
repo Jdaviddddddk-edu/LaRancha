@@ -151,9 +151,32 @@
 #right-button {
   margin-right: 15vw; /* El botón derecho tiene 15% de distancia del borde derecho */
 }
+
+/* Estilo para la pantalla de carga */
+#loading-screen {
+  position: fixed; /* Para cubrir toda la pantalla */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 1); /* Fondo semitransparente */
+  color: white; /* Texto blanco */
+  display: flex; /* Usamos flexbox para centrar el contenido */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  font-size: 24px; /* Tamaño de fuente */
+  z-index: 9999; /* Asegura que esté encima de otros elementos */
+  display: none; /* Inicialmente oculta */
+}
   </style>
 </head>
 <body>
+
+  <!-- Pantalla de carga (inicialmente oculta) -->
+<div id="loading-screen">
+  Cargando videos...
+</div>
+
   <div class="container">
     <!-- Video principal -->
     <video id="scene01" playsinline>
@@ -195,6 +218,72 @@
   
 
   <script>
+
+    // Función para cargar todos los videos
+function loadAllVideos(videoPaths) {
+  // Muestra la pantalla de carga
+  const loadingScreen = document.getElementById('loading-screen');
+  loadingScreen.style.display = 'flex';
+
+  const promises = videoPaths.map((path) => {
+    return new Promise((resolve, reject) => {
+      const videoElement = document.createElement('video');
+      videoElement.src = path;
+
+      videoElement.onloadeddata = () => {
+        console.log(`${path} cargado`);
+        resolve(path);  // Resuelve la promesa cuando el video está cargado
+      };
+
+      videoElement.onerror = (e) => {
+        console.error(`Error al cargar el video: ${path}`, e);
+        reject(e);  // Rechaza la promesa si ocurre un error
+      };
+    });
+  });
+
+  return Promise.all(promises)  // Devuelve una promesa que se resuelve cuando todos los videos están cargados
+    .then(() => {
+      // Oculta la pantalla de carga cuando todos los videos están cargados
+      loadingScreen.style.display = 'none';
+    })
+    .catch((error) => {
+      console.error("Error al cargar los videos:", error);
+      loadingScreen.innerHTML = "Error al cargar los videos. Intenta de nuevo."; // Mensaje de error
+    });
+}
+
+// Rutas de los videos que quieres cargar
+const videoPaths = [
+  "Videos/Escena 1-1.mp4",
+  "Videos/Escena 1-2.mp4",
+  "Videos/Escena 2-1.mp4",
+  "Videos/Escena 2-2.mp4",
+  "Videos/Escena 2-3 DER.mp4",
+  "Videos/Escena 2-4 IZQ.mp4",
+  "Videos/Escena 3-1.mp4",
+  "Videos/Escena 3-2.mp4",
+  "Videos/Escena 4-1.mp4",
+  "Videos/Escena 4-3.mp4",
+  "Videos/Escena 4-4.mp4",
+  "Videos/Escena 4-5.mp4",
+  "Videos/Escena 5.mp4",
+  "Videos/Escena 5-0.mp4",
+  "Videos/Escena 5-1.mp4",
+  "Videos/Escena 6.mp4",
+  "Videos/Escena 7-1.mp4",
+  "Videos/Escena 8-1.mp4",
+  "Videos/Escena 8 servir.mp4",
+  "Videos/Escena 8 vueltas.mp4",
+  "Videos/Limon.mp4",
+  "Videos/Pimienta.mp4",
+  "Videos/Sal.mp4"
+];
+
+// Llamada para cargar todos los videos antes de iniciar
+loadAllVideos(videoPaths);
+
+
     const video = document.getElementById('scene01');
     const dialogueBox = document.getElementById('dialogue-box');
     const interactionButtons = document.getElementById('interaction-buttons');
