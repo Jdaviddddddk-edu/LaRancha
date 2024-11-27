@@ -214,6 +214,7 @@
     let scene5Started = false;
     let scene7Started = false;
     let scene7CountdownInterval; // Variable para almacenar el intervalo del temporizador
+    let scene7CountdownComplete = false;
 
     backgroundMusic.volume = 0.2; // Música de fondo con volumen bajo
 
@@ -289,6 +290,24 @@ function createRedButton() {
   button.style.display = 'none'; // Opcional: Ocultar el botón después de presionarlo
 };
 }
+
+// Función para reproducir el video "Escena 8 vueltas"
+const pezVueltas = () => {
+  console.log("Reproduciendo el video Escena 8 vueltas...");
+
+  // Reproducir el video "Escena 8 vueltas"
+  video.src = "Videos/Escena 8 vueltas.mp4";  // Asegúrate de que la ruta del video sea correcta
+  video.currentTime = 0;  // Comenzar desde el inicio
+  video.play();  // Reproducir el video
+
+  // Cuando termine la "Escena 8 vueltas", reproducir "Escena 8 servir"
+  video.onended = () => {
+    console.log("Escena 8 vueltas finalizada, reproduciendo Escena 8 servir...");
+    video.src = "Videos/Escena 8 servir.mp4";  // Ruta de la siguiente escena
+    video.currentTime = 0;
+    video.play();
+  };
+};
 
 // Función para iniciar el contador
 function startScene5Countdown() {
@@ -422,20 +441,23 @@ centerButton.onclick = () => {
         scene7Started = true;
 
         video.addEventListener('timeupdate', () => {
-  if (scene7Started && !scene7CountdownInterval) {
-    let timer = 0; // Inicializa el contador
-    scene7CountdownInterval = setInterval(() => {
-      timer++;
-      console.log("Contador Escena 7: " + timer + " segundos");
+          if (scene7Started && !scene7CountdownInterval && !scene7CountdownComplete) {
+            let timer = 0; // Inicializa el contador
 
-      if (timer === 15) {
-        clearInterval(scene7CountdownInterval); // Detiene el temporizador
-        scene7CountdownInterval = null;
-        createBottomButtons(); // Crea los botones
-        video.pause();
-      }
-    }, 1000); // Incrementa cada segundo
-  }
+            scene7CountdownInterval = setInterval(() => {
+    timer++;
+    console.log("Contador Escena 7: " + timer + " segundos");
+
+    if (timer === 15) {
+      clearInterval(scene7CountdownInterval); // Detiene el temporizador
+      scene7CountdownInterval = null; // Reinicia la referencia
+      scene7CountdownComplete = true; // Marca el contador como completado
+      createBottomButtons(); // Crea los botones
+      video.pause(); // Pausa el video
+      console.log("El contador de la escena 7 se ha completado.");
+    }
+  }, 1000); // Incrementa cada segundo
+}
 });
 
 function createBottomButtons() {
@@ -451,73 +473,88 @@ function createBottomButtons() {
   bottomButtonsContainer.style.padding = '0 10px'; // Espacio lateral
   document.body.appendChild(bottomButtonsContainer);
 
-  // Variable para el contador de tiempo transcurrido
-  let elapsedTime = 0;
-  let isCounting = false;  // Controla si el contador está en marcha
+  // Variables de estado
+  let elapsedTime = 0; // Tiempo acumulado de los videos
+  const totalVideoDuration = 11; // Duración total de los videos necesarios (en segundos)
 
-  // Duración total de los tres videos combinados (en segundos)
-  const totalVideoDuration = 11;
-
-  // Función para avanzar a la escena 8
   const advanceToScene8 = () => {
-    console.log("Avanzando a la escena 8...");
+  console.log("Avanzando a la escena 8...");
 
-    // Cambiar a la escena 8-1
-    video.src = "Videos/Escena 8-1.mp4"; // Ruta de la escena 8
+  // Cambiar a la escena 8-1
+  video.src = "Videos/Escena 8-1.mp4";
+  video.currentTime = 0;
+  video.play();
+
+  // Detectar cuando el tiempo del video alcanza 9 segundos
+  video.addEventListener("timeupdate", function pauseAtNine() {
+  if (video.currentTime >= 8) {
+    console.log("Video pausado en 9 segundos");
+    video.pause();  // Pausa el video
+
+    // Eliminar el event listener para que no se repita
+    video.removeEventListener("timeupdate", pauseAtNine);
+
+      // Crear el botón "vueltas"
+      const vueltasButton = document.createElement("button");
+      vueltasButton.textContent = "Vueltas";
+      vueltasButton.style.position = "absolute";
+      vueltasButton.style.top = "300px"; // Separación desde el borde superior
+      vueltasButton.style.left = "50%";
+      vueltasButton.style.transform = "translateX(-50%)"; // Centrar horizontalmente
+      vueltasButton.style.padding = "10px 20px";
+      vueltasButton.style.fontSize = "16px";
+
+      vueltasButton.onclick = () => {
+        console.log("Botón 'Vueltas' presionado");
+        pezVueltas();
+        vueltasButton.remove(); // Elimina el botón
+        vueltasButton.style.visibility = 'hidden'; // Hacer invisible
+        vueltasButton.disabled = true; // Deshabilitar el botón
+      };
+
+      // Agregar el botón al cuerpo del documento
+      document.body.appendChild(vueltasButton);
+
+      // Eliminar el listener para evitar ejecuciones repetidas
+      video.removeEventListener("timeupdate", arguments.callee);
+    }
+  });
+};
+
+  // Función para crear botones reutilizables
+const createButton = (text, videoPath, videoDuration) => {
+  const button = document.createElement('button');
+  button.textContent = text;
+  button.className = 'button';
+  button.style.padding = '10px 20px'; // Tamaño del botón
+  button.style.fontSize = '16px'; // Tamaño del texto
+
+  button.onclick = () => {
+    console.log(`Botón ${text} presionado`);
+
+    // Reproducir el video correspondiente
+    video.src = videoPath;
     video.currentTime = 0;
     video.play();
 
-    // Una vez que la escena 8-1 termine, avanzar a la escena 8-servir
-    video.addEventListener('ended', () => {
-      // Cambiar a la escena 8-servir
-      video.src = "Videos/Escena 8 servir.mp4"; // Ruta de la escena 8-servir
-      video.currentTime = 0;
-      video.play();
-    });
-  };
+    // Ocultar el botón y deshabilitarlo
+    button.style.visibility = 'hidden'; // Hacer invisible
+    button.disabled = true; // Deshabilitar el botón
 
-  // Función para crear botones reutilizable
-  const createButton = (text, videoPath, videoDuration) => {
-    const button = document.createElement('button');
-    button.textContent = text;
-    button.className = 'button';
-    button.style.padding = '10px 20px'; // Tamaño del botón
-    button.style.fontSize = '16px'; // Tamaño del texto
-    button.onclick = () => {
-      console.log(`Botón ${text} presionado`);
-      // Acción para el botón
-      video.src = videoPath;
-      video.currentTime = 0;
-      video.play();
+    // Asignar acción al finalizar el video
+    video.onended = () => {
+      elapsedTime += videoDuration; // Sumar la duración al tiempo acumulado
+      console.log(`Tiempo acumulado (elapsedTime) después de ${text}: ${elapsedTime}s`);
 
-      // Si no se ha iniciado el contador, iniciar ahora
-      if (!isCounting) {
-        isCounting = true;
-        elapsedTime = 0; // Reiniciar el contador
+      // Verificar si se alcanzó o superó el tiempo total
+      if (elapsedTime >= totalVideoDuration) {
+        console.log("Tiempo acumulado alcanza o supera el total. Avanzando a la escena 8...");
+        advanceToScene8();
       }
-
-      // Ocultar el botón y deshabilitarlo
-      button.style.visibility = 'hidden'; // Hacer invisible
-      button.disabled = true; // Deshabilitar el botón
-
-      // Continuar el contador y agregar la duración del video
-      const videoEndHandler = () => {
-        elapsedTime += videoDuration; // Sumar la duración del video actual al contador
-        video.removeEventListener('ended', videoEndHandler); // Desregistrar el evento después de usarlo
-
-        // Si el tiempo total es suficiente, ir a la escena 8
-        if (elapsedTime >= totalVideoDuration) {
-          advanceToScene8();
-          // Una vez que se haya avanzado a la escena 8, eliminar los botones
-          document.getElementById('bottom-buttons').remove();
-        }
-      };
-
-      // Añadir el evento "ended" para sumar el tiempo al contador cuando termine el video
-      video.addEventListener('ended', videoEndHandler);
     };
-    return button;
   };
+  return button;
+};
 
   // Crear y agregar los botones al contenedor con sus respectivas duraciones
   bottomButtonsContainer.appendChild(createButton('Sal', 'Videos/Sal.mp4', 3));
