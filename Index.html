@@ -277,9 +277,6 @@ loadAllVideos(videoPaths)
     
     // Ocultar la pantalla de carga
     document.getElementById('loading-screen').style.display = 'none';
-
-    // Ahora, los videos están listos para ser reproducidos
-    startPlayback(loadedVideos);  // Aquí pasamos los videos cargados para comenzar la reproducción
   })
   .catch((error) => {
     console.error('Error al cargar los videos:', error);
