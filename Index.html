@@ -152,9 +152,28 @@
   margin-right: 15vw; /* El botón derecho tiene 15% de distancia del borde derecho */
 }
 
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 1);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  z-index: 9999;
+}
+
   </style>
 </head>
 <body>
+
+  <div id="loading-screen">
+    Cargando videos...
+  </div>
 
   <div class="container">
     <!-- Video principal -->
@@ -194,9 +213,73 @@
     <button id="left-button" class="circle-button"></button>
     <button id="right-button" class="circle-button"></button>
   </div>
-  
 
   <script>
+
+const videoPaths = [
+    "Videos/Escena 1-1.mp4",
+  "Videos/Escena 1-2.mp4",
+  "Videos/Escena 2-1.mp4",
+  "Videos/Escena 2-2.mp4",
+  "Videos/Escena 2-3 DER.mp4",
+  "Videos/Escena 2-4 IZQ.mp4",
+  "Videos/Escena 3-1.mp4",
+  "Videos/Escena 3-2.mp4",
+  "Videos/Escena 4-1.mp4",
+  "Videos/Escena 4-3.mp4",
+  "Videos/Escena 4-4.mp4",
+  "Videos/Escena 4-5.mp4",
+  "Videos/Escena 5.mp4",
+  "Videos/Escena 5-0.mp4",
+  "Videos/Escena 5-1.mp4",
+  "Videos/Escena 6.mp4",
+  "Videos/Escena 7-1.mp4",
+  "Videos/Escena 8-1.mp4",
+  "Videos/Escena 8 servir.mp4",
+  "Videos/Escena 8 vueltas.mp4",
+  "Videos/Limon.mp4",
+  "Videos/Pimienta.mp4",
+  "Videos/Sal.mp4"
+  ];
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").then(() => {
+        console.log("Service Worker registrado.");
+        verifyCacheStatus(); // Verificar el caché después de registrar
+      }).catch((error) => {
+        console.error("Error al registrar el Service Worker:", error);
+      });
+    });
+  }
+
+  function verifyCacheStatus() {
+    const loadingScreen = document.getElementById("loading-screen");
+
+    caches.open("video-cache-v1").then((cache) => {
+      cache.keys().then((cachedRequests) => {
+        const cachedURLs = cachedRequests.map((request) => request.url);
+        const normalizedPaths = videoPaths.map((path) =>
+          new URL(path, location.origin).href
+        );
+
+        const allCached = normalizedPaths.every((normalizedPath) =>
+          cachedURLs.includes(normalizedPath)
+        );
+
+        if (allCached) {
+          console.log("Todos los videos están en caché.");
+          loadingScreen.style.display = "none"; // Ocultar la pantalla de carga
+        } else {
+          console.log("No todos los videos están aún en caché.");
+          console.log("Videos encontrados en caché:", cachedURLs);
+          console.log("Rutas esperadas:", normalizedPaths);
+        }
+      }).catch((error) => {
+        console.error("Error al verificar el estado del caché:", error);
+      });
+    });
+  }
 
     const video = document.getElementById('scene01');
     const dialogueBox = document.getElementById('dialogue-box');
