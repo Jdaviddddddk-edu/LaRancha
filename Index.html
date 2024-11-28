@@ -295,6 +295,7 @@
 <!-- Overlay oscuro -->
 <div id="overlay">
   <div id="button-container">
+    <img id="overlay-logo" src="Imagenes/LogoLaRanchaBlanco.png" alt="Logo" />
     <button id="restart-button">Reiniciar</button>
     <button id="artbook-button">Mira nuestro ArtBook</button>
     <button id="instagram-button">Visita La Casa de La Paz</button>
@@ -496,7 +497,7 @@ const pezVueltas = () => {
   const overlayLogo = document.getElementById('overlay-logo');
 
   // Ruta del logo (modifícalo aquí)
-  overlayLogo.src = "ruta_del_logo.png";
+  overlayLogo.src = "Imagenes/LogoLaRanchaBlanco.png";
 
   overlay.style.display = "flex";
 
@@ -578,10 +579,10 @@ function startScene5Countdown() {
     const topButtonsContainer = document.createElement('div');
     topButtonsContainer.id = 'top-buttons';
     topButtonsContainer.style.position = 'absolute';
-    topButtonsContainer.style.top = '150px';
+    topButtonsContainer.style.top = '80px';
     topButtonsContainer.style.width = '80%';
     topButtonsContainer.style.display = 'flex';
-    topButtonsContainer.style.scale = "0.6";
+    topButtonsContainer.style.scale = "0.5";
     topButtonsContainer.style.justifyContent = 'space-between';
     document.body.appendChild(topButtonsContainer);
 
