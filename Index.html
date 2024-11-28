@@ -69,11 +69,13 @@
       background: #ff6600;
       color: white;
       border: none;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 1em;
+      border-radius: 10px;
+      padding: 20px 40px;
+      font-size: 2em;
       cursor: pointer;
       pointer-events: auto;
+      font-family:Arial, Helvetica, sans-serif ;
+      font-weight: 400;
     }
     .button:hover {
       background: #cc5200;
@@ -115,7 +117,7 @@
 /* Contenedor para los botones circulares */
 #circle-buttons {
   position: absolute;
-  bottom: 5vh; /* Espacio del 5% de la altura del video desde el borde inferior */
+  bottom: 200px; /* Espacio del 5% de la altura del video desde el borde inferior */
   width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
   display: flex;
   justify-content: space-between; /* Espacio entre los botones */
@@ -127,10 +129,10 @@
 
 /* Estilo para los botones circulares */
 .circle-button {
-  width: 12vw; /* El ancho del botón es el 12% de la ventana de visualización (ancho) */
-  height: 12vw; /* Mantener la proporción cuadrada */
-  max-width: 60px; /* Limitar el tamaño máximo del botón en pantallas grandes */
-  max-height: 60px; /* Limitar el tamaño máximo del botón en pantallas grandes */
+  width: 32vw; /* El ancho del botón es el 12% de la ventana de visualización (ancho) */
+  height: 32vw; /* Mantener la proporción cuadrada */
+  max-width: 80px; /* Limitar el tamaño máximo del botón en pantallas grandes */
+  max-height: 80px; /* Limitar el tamaño máximo del botón en pantallas grandes */
   border: 3px solid red;
   background-color: transparent;
   border-radius: 50%;
@@ -145,11 +147,11 @@
 
 /* Asegura que los botones estén a distancias diferentes del borde */
 #left-button {
-  margin-left: 10vw; /* El botón izquierdo tiene 10% de distancia del borde izquierdo */
+  margin-left: 20px; /* El botón izquierdo tiene 10% de distancia del borde izquierdo */
 }
 
 #right-button {
-  margin-right: 15vw; /* El botón derecho tiene 15% de distancia del borde derecho */
+  margin-right: 27px; /* El botón derecho tiene 15% de distancia del borde derecho */
 }
 
 #loading-screen {
@@ -167,12 +169,88 @@
   z-index: 9999;
 }
 
+/* Video */
+#videoLoad {
+  width: 100%; /* Asegura que el video ocupe el ancho del contenedor */
+  height: auto; /* Mantiene proporciones */
+  z-index: 1; /* Asegura que el video quede detrás del texto */
+}
+
+/* Texto de cargando */
+#loading-text {
+  position: absolute; /* Posiciona el texto encima del video */
+  top: 50%; /* Centra verticalmente */
+  left: 50%; /* Centra horizontalmente */
+  bottom: 20%;
+  transform: translate(-50%, 50%); /* Ajusta para un centrado exacto */
+  font-size: 24px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 300;
+  color: white;
+  background: rgba(0, 0, 0, 0.5); /* Fondo oscuro translúcido */
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 2; /* Asegura que el texto quede encima del video */
+}
+
+/* Overlay oscuro */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(117, 63, 0, 0.822);
+  display: none; /* Oculto por defecto */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: white;
+  flex-direction: column;
+  flex-direction: column; /* Todo el contenido en columna */
+}
+
+#button-container {
+  display: flex;
+  flex-direction: column; /* Organiza botones en columna */
+  align-items: center; /* Centra los botones horizontalmente */
+  gap: 10px; /* Espacio entre botones */
+}
+
+#overlay img {
+  width: 30vh;
+  margin-bottom: 50px;
+}
+
+#overlay button {
+  margin: 10px;
+  padding: 10px 20px;
+  height: 50%;
+  font-size: 1em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 300;
+  cursor: pointer;
+  background-color: #632700b0;
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 50px;
+  transition: background-color 0.3s;
+}
+
+#overlay button:hover {
+  background-color: #ff9100;
+}
+
   </style>
 </head>
 <body>
 
   <div id="loading-screen">
-    Cargando videos...
+    <p id="loading-text">Cargando videos...</p>
+    <video id="videoLoad" autoplay muted>
+      <source src="Videos/videoLoad.mp4" type="video/mp4">
+      Tu navegador no soporta el elemento de video.
+    </video>
   </div>
 
   <div class="container">
@@ -214,9 +292,20 @@
     <button id="right-button" class="circle-button"></button>
   </div>
 
+<!-- Overlay oscuro -->
+<div id="overlay">
+  <img id="overlay-logo" src="Imagenes/LogoLaRancha.png" alt="Logo" />
+  <div id="button-container">
+    <button id="restart-button">Reiniciar</button>
+    <button id="artbook-button">Mira nuestro ArtBook</button>
+    <button id="instagram-button">Visita La Casa de La Paz</button>
+  </div>
+</div>
+
   <script>
 
 const videoPaths = [
+  "Imagenes/LogoLaRanchaBlanco.png",
     "Videos/Escena 1-1.mp4",
   "Videos/Escena 1-2.mp4",
   "Videos/Escena 2-1.mp4",
@@ -323,6 +412,7 @@ const videoPaths = [
       if (video.currentTime >= 13 && !buttonShown && !buttonClickedOnce) {
         video.pause();
         interactionButtons.style.visibility = 'visible';
+        interactionButtons.style.scale = '0.6';
         buttonShown = true;
       }
 
@@ -358,12 +448,12 @@ function createRedButton() {
   
   // Estilo del botón
   button.style.position = "fixed"; // Fijarlo en la pantalla
-  button.style.top = "320px"; // Alinearlo a la parte superior
+  button.style.top = "300px"; // Alinearlo a la parte superior
   button.style.left = "50%"; // Centrarlo horizontalmente
   button.style.transform = "translateX(-50%)"; // Ajustar para centrarlo
   button.style.backgroundColor = "transparent"; // Color de fondo rojo
   button.style.color = "white"; // Texto blanco
-  button.style.border = "none"; // Sin borde
+  button.style.border = "none";
   button.style.padding = "40px 30px"; // Espaciado interno
   button.style.cursor = "pointer"; // Cambiar el cursor al pasar el ratón
 
@@ -392,6 +482,46 @@ const pezVueltas = () => {
     video.src = "Videos/Escena 8 servir.mp4";  // Ruta de la siguiente escena
     video.currentTime = 0;
     video.play();
+
+    video.onended = () => {
+  console.log("Animación finalizada, mostrando overlay...");
+
+  // Pausar el video
+  video.pause();
+
+  // Mostrar el overlay
+  const overlay = document.getElementById('overlay');
+  const restartButton = document.getElementById('restart-button');
+  const instagramButton = document.getElementById('instagram-button');
+  const artBookButton = document.getElementById('artbook-button');
+  const overlayLogo = document.getElementById('overlay-logo');
+
+  // Ruta del logo (modifícalo aquí)
+  overlayLogo.src = "ruta_del_logo.png";
+
+  overlay.style.display = "flex";
+
+  // Botón para reiniciar todo
+  restartButton.onclick = () => {
+    console.log("Reiniciando todo...");
+    overlay.style.display = "none"; // Ocultar el overlay
+    location.reload(); // Recargar la página para reiniciar
+  };
+
+  // Botón para ver el artbook
+  artBookButton.onclick = () => {
+    console.log("Abriendo ArtBook");
+    window.open("https://www.calameo.com/read/007223853ea9fa2951460", "_blank"); // Abre el enlace en una nueva pestaña
+  };
+
+  // Botón para ir a Instagram
+  instagramButton.onclick = () => {
+    console.log("Abriendo Instagram...");
+    window.open("https://www.instagram.com/latrochacerveza/", "_blank"); // Abre el enlace en una nueva pestaña
+  };
+};
+
+
   };
 };
 
@@ -422,16 +552,7 @@ function startScene5Countdown() {
   const circleButtons = document.getElementById('circle-buttons');
   circleButtons.style.display = 'flex';
 
-  // Crear el botón de continuar dinámicamente
-  const continueButton = document.createElement('button');
-  continueButton.textContent = "Continuar";
-  continueButton.className = 'button';
-  continueButton.style.position = 'absolute';
-  continueButton.style.bottom = '10%';
-  continueButton.style.left = '50%';
-  continueButton.style.transform = 'translateX(-50%)';
-  continueButton.style.display = 'none'; // Inicialmente oculto
-  document.body.appendChild(continueButton);
+  
 
   // Función para reproducir Escena 4-1
   const playScene41 = () => {
@@ -439,9 +560,13 @@ function startScene5Countdown() {
     video.src = "Videos/Escena 4-1.mp4";
     video.currentTime = 0;
     video.play();
-    continueButton.style.display = 'none'; // Ocultar el botón continuar
-    
 
+    // Agregar el evento 'onended' para pausar el video al finalizar
+  video.onended = () => {
+    video.pause();
+    console.log("Video pausado automáticamente al terminar.");
+  };
+    
     // Mostrar tres botones a los 17 segundos
     setTimeout(() => {
       createTopButtons();
@@ -454,11 +579,11 @@ function startScene5Countdown() {
     const topButtonsContainer = document.createElement('div');
     topButtonsContainer.id = 'top-buttons';
     topButtonsContainer.style.position = 'absolute';
-    topButtonsContainer.style.top = '5%';
+    topButtonsContainer.style.top = '150px';
     topButtonsContainer.style.width = '80%';
     topButtonsContainer.style.display = 'flex';
+    topButtonsContainer.style.scale = "0.6";
     topButtonsContainer.style.justifyContent = 'space-between';
-    topButtonsContainer.style.padding = '0 5%';
     document.body.appendChild(topButtonsContainer);
 
     // Botón izquierdo
@@ -584,11 +709,13 @@ function createBottomButtons() {
       const vueltasButton = document.createElement("button");
       vueltasButton.textContent = "Vueltas";
       vueltasButton.style.position = "absolute";
-      vueltasButton.style.top = "300px"; // Separación desde el borde superior
+      vueltasButton.style.bottom = "35%"; // Separación desde el borde superior
       vueltasButton.style.left = "50%";
+      vueltasButton.style.backgroundColor = "transparent";
+      vueltasButton.style.borderColor = "red";
       vueltasButton.style.transform = "translateX(-50%)"; // Centrar horizontalmente
-      vueltasButton.style.padding = "10px 20px";
-      vueltasButton.style.fontSize = "16px";
+      vueltasButton.style.padding = "60px 70px";
+      vueltasButton.style.fontSize = "0px";
 
       vueltasButton.onclick = () => {
         console.log("Botón 'Vueltas' presionado");
@@ -702,8 +829,7 @@ console.log("Botones superiores añadidos");
 
     // Mostrar el botón de continuar después de finalizar Escena 2-4 IZQ
     video.onended = () => {
-      continueButton.style.display = 'block'; // Mostrar el botón continuar
-      continueButton.onclick = playScene41; // Asignar la acción de reproducir Escena 4-1
+      playScene41();; // Asignar la acción de reproducir Escena 4-1
     };
   };
 
@@ -719,8 +845,7 @@ console.log("Botones superiores añadidos");
 
     // Mostrar el botón de continuar después de finalizar Escena 2-4 IZQ
     video.onended = () => {
-      continueButton.style.display = 'block'; // Mostrar el botón continuar
-      continueButton.onclick = playScene41; // Asignar la acción de reproducir Escena 4-1
+      playScene41(); // Asignar la acción de reproducir Escena 4-1
     };
   };
 

@@ -24,7 +24,8 @@ const videoPaths = [
   "Videos/Escena 8 vueltas.mp4",
   "Videos/Limon.mp4",
   "Videos/Pimienta.mp4",
-  "Videos/Sal.mp4"
+  "Videos/Sal.mp4",
+  "Imagenes/LogoLaRanchaBlanco.png"
 ];
 
 // Convertir rutas relativas en URLs absolutas
